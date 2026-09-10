@@ -9,9 +9,8 @@ ENV PORT=8000
 
 COPY . .
 
-RUN mkdir -p /app/data \
-    && python setup.py
-    
+RUN mkdir -p /app/data
+
 EXPOSE 8000
 
-CMD ["python", "worker.py", "serve"]
+CMD ["sh", "-c", "if [ ! -f /app/data/keywords.json ]; then printf '\\n\\n\\n\\n\\n\\n\\n\\n\\n\\n' | python setup.py; fi && exec python worker.py serve"]
