@@ -26,10 +26,10 @@ PROVIDERS = {
         "configured": gemini_prov.configured,
         "search": gemini_prov.search,
     },
-    "own_ai_overviews": {
-        "label": "Google AI Overview · OpenWebNinja",
+    "own_ai_mode": {
+        "label": "Google AI Mode · OpenWebNinja",
         "configured": own.configured,
-        "search": own.ai_overviews_search,
+        "search": own.ai_mode_search,
     },
     "own_chatgpt": {
         "label": "ChatGPT · OpenWebNinja",

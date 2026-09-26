@@ -336,7 +336,7 @@ async def api_settings_set(payload: dict):
         "ai_schedule_enabled", "ai_schedule_dow", "ai_schedule_hour",
         "geogrid_schedule_enabled", "geogrid_schedule_dow", "geogrid_schedule_hour",
         "brand_name", "openai_enabled", "gemini_enabled",
-        "own_ai_overviews_enabled", "own_chatgpt_enabled", "own_gemini_enabled",
+        "own_ai_mode_enabled", "own_chatgpt_enabled", "own_gemini_enabled",
     }
     clean = {k: str(v) for k, v in payload.items() if k in allowed}
     db.set_settings(clean)

@@ -1,9 +1,10 @@
-"""OpenWebNinja provider — Google AI Overviews + ChatGPT/Gemini relays.
+"""OpenWebNinja provider — Google AI Mode + ChatGPT/Gemini relays.
 
-One key serves three engines:
-  - /ai-overviews   -> Google Search AI Overview (text + reference links)
-  - /chatgpt/chat   -> ChatGPT (web access)
-  - /gemini/chat    -> Gemini (web access)
+Engines (one key):
+  - /google-ai-mode/ai-mode -> Google AI Mode: the AI answer (reply_parts)
+    plus its reference links, all in one call.
+  - /chatgpt/chat           -> ChatGPT (web access)
+  - /gemini/chat            -> Gemini (web access)
 
 Auth: `x-api-key` header. Each API must be subscribed in the OpenWeb Ninja
 dashboard first (they have free tiers).
@@ -68,8 +69,22 @@ def _post(path: str, body: dict) -> dict:
         _raise_http(exc)
 
 
+def _gl(language_code: str) -> str:
+    return "es" if (language_code or "").lower() == "es" else "us"
+
+
+def _dedupe(urls: list[str]) -> list[str]:
+    seen, sources = set(), []
+    for u in urls:
+        d = util.domain_from_url(u)
+        if d and d not in seen and d not in ("openwebninja.com", "www.openwebninja.com"):
+            seen.add(d)
+            sources.append(d)
+    return sources
+
+
 def _extract(data) -> tuple[str, list[str]]:
-    """Best-effort: longest string = answer text; every URL = source."""
+    """Fallback for relay endpoints: longest string = answer, every URL = source."""
     strings: list[str] = []
     urls: list[str] = []
 
@@ -90,35 +105,27 @@ def _extract(data) -> tuple[str, list[str]]:
     return text, urls
 
 
-def _finish(data) -> dict:
-    text, urls = _extract(data)
-    seen, sources = set(), []
-    for u in urls:
-        d = util.domain_from_url(u)
-        if d and d not in seen and d not in ("openwebninja.com", "www.openwebninja.com"):
-            seen.add(d)
-            sources.append(d)
-    return {"has_ai": True, "sources": sources, "text": text, "cost": COST_PER_QUERY}
-
-
-def _gl(language_code: str) -> str:
-    return "es" if (language_code or "").lower() == "es" else "us"
-
-
-def ai_overviews_search(keyword: str, location_code: int, language_code: str,
-                        brand_name: str = "", domain: str = "") -> dict:
-    data = _get("/ai-overviews", {"q": keyword, "gl": _gl(language_code),
-                                  "hl": language_code or "en"})
-    return _finish(data)
+def ai_mode_search(keyword: str, location_code: int, language_code: str,
+                   brand_name: str = "", domain: str = "") -> dict:
+    data = _get("/google-ai-mode/ai-mode",
+                {"prompt": keyword, "gl": _gl(language_code), "hl": language_code or "en"})
+    d = data.get("data") or {}
+    text = " ".join((p.get("text") or "") for p in (d.get("reply_parts") or [])
+                    if isinstance(p, dict))
+    urls = [r.get("link") or "" for r in (d.get("reference_links") or [])
+            if isinstance(r, dict)]
+    return {"has_ai": True, "sources": _dedupe(urls), "text": text, "cost": COST_PER_QUERY}
 
 
 def chatgpt_search(keyword: str, location_code: int, language_code: str,
                    brand_name: str = "", domain: str = "") -> dict:
     data = _post("/chatgpt/chat", {"message": keyword, "markdown": True})
-    return _finish(data)
+    text, urls = _extract(data)
+    return {"has_ai": True, "sources": _dedupe(urls), "text": text, "cost": COST_PER_QUERY}
 
 
 def gemini_search(keyword: str, location_code: int, language_code: str,
                   brand_name: str = "", domain: str = "") -> dict:
     data = _post("/gemini/chat", {"message": keyword, "markdown": True})
-    return _finish(data)
+    text, urls = _extract(data)
+    return {"has_ai": True, "sources": _dedupe(urls), "text": text, "cost": COST_PER_QUERY}
