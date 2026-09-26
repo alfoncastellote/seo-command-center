@@ -28,6 +28,8 @@ OPENAI_MODEL = env("OPENAI_MODEL", "gpt-4o-mini")
 GEMINI_API_KEY = env("GEMINI_API_KEY")
 GEMINI_MODEL = env("GEMINI_MODEL", "gemini-3.8-flash")
 
+OPENWEBNINJA_API_KEY = env("OPENWEBNINJA_API_KEY")
+
 HOST = env("HOST", "0.0.0.0")
 PORT = int(env("PORT", "8000"))
 
@@ -48,4 +50,7 @@ DEFAULT_SETTINGS = {
     "brand_name": BRAND_NAME,
     "openai_enabled": "1",
     "gemini_enabled": "1",
+    "own_ai_overviews_enabled": "1",
+    "own_chatgpt_enabled": "1",
+    "own_gemini_enabled": "1",
 }

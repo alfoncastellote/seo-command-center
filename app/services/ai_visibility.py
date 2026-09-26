@@ -7,6 +7,7 @@ from .. import db
 from ..providers import dataforseo as dfs
 from ..providers import gemini as gemini_prov
 from ..providers import openai as openai_prov
+from ..providers import openwebninja as own
 from ..providers import util
 
 PROVIDERS = {
@@ -24,6 +25,21 @@ PROVIDERS = {
         "label": "Gemini",
         "configured": gemini_prov.configured,
         "search": gemini_prov.search,
+    },
+    "own_ai_overviews": {
+        "label": "Google AI Overview · OpenWebNinja",
+        "configured": own.configured,
+        "search": own.ai_overviews_search,
+    },
+    "own_chatgpt": {
+        "label": "ChatGPT · OpenWebNinja",
+        "configured": own.configured,
+        "search": own.chatgpt_search,
+    },
+    "own_gemini": {
+        "label": "Gemini · OpenWebNinja",
+        "configured": own.configured,
+        "search": own.gemini_search,
     },
 }
 
