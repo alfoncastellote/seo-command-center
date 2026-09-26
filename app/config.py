@@ -48,9 +48,12 @@ DEFAULT_SETTINGS = {
     "geogrid_schedule_dow": "1",
     "geogrid_schedule_hour": "7",
     "brand_name": BRAND_NAME,
+    "google_ai_overview_enabled": "1",
     "openai_enabled": "1",
     "gemini_enabled": "0",
+    "own_ai_overviews_enabled": "1",
     "own_ai_mode_enabled": "1",
     "own_chatgpt_enabled": "0",
-    "own_gemini_enabled": "0",
+    "own_gemini_enabled": "1",
+    "own_copilot_enabled": "0",
 }

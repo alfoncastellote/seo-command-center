@@ -26,6 +26,11 @@ PROVIDERS = {
         "configured": gemini_prov.configured,
         "search": gemini_prov.search,
     },
+    "own_ai_overviews": {
+        "label": "Google AI Overview · OpenWebNinja",
+        "configured": own.configured,
+        "search": own.ai_overviews_search,
+    },
     "own_ai_mode": {
         "label": "Google AI Mode · OpenWebNinja",
         "configured": own.configured,
@@ -41,15 +46,20 @@ PROVIDERS = {
         "configured": own.configured,
         "search": own.gemini_search,
     },
+    "own_copilot": {
+        "label": "Copilot · OpenWebNinja",
+        "configured": own.configured,
+        "search": own.copilot_search,
+    },
 }
 
 
 def enabled_providers() -> list[tuple[str, dict]]:
-    """Providers that are configured (key present) and not disabled in settings."""
+    """Providers that are configured (key present) and enabled in settings."""
     flags = db.get_settings()
     out = []
     for key, meta in PROVIDERS.items():
-        if key != "google_ai_overview" and flags.get(f"{key}_enabled", "1") != "1":
+        if flags.get(f"{key}_enabled", "1") != "1":
             continue
         if not meta["configured"]():
             continue
@@ -65,7 +75,7 @@ def provider_status() -> list[dict]:
             "key": key,
             "label": meta["label"],
             "configured": bool(meta["configured"]()),
-            "enabled": key == "google_ai_overview" or flags.get(f"{key}_enabled", "1") == "1",
+            "enabled": flags.get(f"{key}_enabled", "1") == "1",
         })
     return out
 

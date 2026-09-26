@@ -26,7 +26,6 @@
         const toggle = SVP.el("label", { class: "cmp", style: "min-width:190px" });
         const cb = SVP.el("input", { type: "checkbox" });
         cb.checked = p.enabled;
-        if (p.key === "google_ai_overview") { cb.checked = true; cb.disabled = true; }
         cb.dataset.engine = p.key;
         toggle.appendChild(cb);
         toggle.appendChild(SVP.el("span", { text: p.label }));
