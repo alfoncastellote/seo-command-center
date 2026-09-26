@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}AI Visibility{% endblock %}
+
+{% block topbar %}
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="view-head">
+      <h1>AI Visibility</h1>
+      <span class="sub">Does Google's AI Overview mention you — or your competitors?</span>
+    </div>
+    <div class="readouts">
+      <div class="readout"><span class="v" id="ro-keywords">—</span><span class="k">keywords scanned</span></div>
+      <div class="readout"><span class="v" id="ro-cited">—</span><span class="k">cited by AI</span></div>
+      <div class="readout"><span class="v" id="ro-last">—</span><span class="k">last scan</span></div>
+      <div class="readout"><span class="v" id="ro-cost">—</span><span class="k">run cost</span></div>
+    </div>
+    <button class="btn btn-primary" id="run-btn">Run scan</button>
+  </div>
+  <div class="progress" id="run-progress" hidden><i></i></div>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="section-head">
+  <h2>Brand</h2>
+  <span class="meta" id="brand-meta"></span>
+</div>
+<div class="chips" id="brand-chips" style="margin-bottom:16px"></div>
+
+<div class="chips" id="filter-bar" style="margin-bottom:16px">
+  <button class="chip on" data-f="all">All</button>
+  <button class="chip" data-f="ai">Has AI Overview</button>
+  <button class="chip" data-f="cited">Cited</button>
+  <button class="chip" data-f="missing">Missing citation</button>
+</div>
+
+<div id="report"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/ai_visibility.js"></script>
+{% endblock %}

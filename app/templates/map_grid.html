@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Map Grid{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+{% endblock %}
+
+{% block topbar %}
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="view-head">
+      <h1>Map Grid</h1>
+      <span class="sub">Your Google map-pack rank from every point across a city grid.</span>
+    </div>
+    <div class="readouts">
+      <div class="readout"><span class="v" id="ro-points">—</span><span class="k">grid points</span></div>
+      <div class="readout"><span class="v" id="ro-avg">—</span><span class="k">avg rank</span></div>
+      <div class="readout"><span class="v" id="ro-t3">—</span><span class="k">pins in top 3</span></div>
+      <div class="readout"><span class="v" id="ro-last">—</span><span class="k">last scan</span></div>
+    </div>
+    <button class="btn" id="setup-btn">Grid setup</button>
+    <button class="btn btn-primary" id="run-btn">Run scan</button>
+  </div>
+  <div class="progress" id="run-progress" hidden><i></i></div>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="section-head">
+  <h2>Brand</h2>
+  <span class="meta" id="brand-meta"></span>
+</div>
+<div class="chips" id="brand-chips" style="margin-bottom:18px"></div>
+
+<div id="report"></div>
+
+<div class="overlay" id="setup-modal">
+  <div class="modal">
+    <h3>Grid setup</h3>
+    <div class="mhint">Track your map-pack rank across a grid of GPS points. Scans run on demand or weekly.</div>
+    <div class="mlbl">Brand</div>
+    <div class="chips" id="setup-brand"></div>
+    <div class="mlbl">Grid center — lat, lng</div>
+    <input class="input" id="setup-center" placeholder="30.2672, -97.7431">
+    <div class="mhint">In Google Maps, right-click your service-area center and click the coordinates to copy them.</div>
+    <div class="mlbl">Grid size</div>
+    <div class="chips" id="setup-size">
+      <button data-v="5">5 × 5</button><button data-v="7" class="on">7 × 7</button><button data-v="9">9 × 9</button>
+    </div>
+    <div class="mlbl">Point spacing (miles)</div>
+    <input class="input" id="setup-spacing" type="number" step="0.5" min="0.5" max="15" value="3.5">
+    <div class="mlbl">Keywords — one per line (max 10)</div>
+    <textarea class="input" id="setup-kws" rows="4" placeholder="dentist&#10;emergency dentist"></textarea>
+    <div class="mrow">
+      <button class="btn btn-danger" id="setup-remove" style="margin-right:auto;display:none">Remove grid</button>
+      <button class="btn" data-close>Cancel</button>
+      <button class="btn btn-primary" id="setup-save">Save grid</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="/static/js/map_grid.js"></script>
+{% endblock %}

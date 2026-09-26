@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Brands & keywords{% endblock %}
+
+{% block topbar %}
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="view-head">
+      <h1>Brands &amp; keywords</h1>
+      <span class="sub">Domains and keyword sets that drive both reports.</span>
+    </div>
+    <button class="btn btn-primary" id="new-brand" style="margin-left:auto">New brand</button>
+  </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="panel" id="create-panel" hidden>
+  <div class="panel-head"><h3>New brand</h3></div>
+  <div class="panel-body">
+    <div class="split" style="grid-template-columns:1fr 1fr 160px 160px">
+      <div style="border-right:none;padding:0">
+        <div class="field"><label>Brand name</label><input class="input" id="c-name" placeholder="BrightSmile Dental"></div>
+      </div>
+      <div style="padding:0">
+        <div class="field"><label>Domain</label><input class="input" id="c-domain" placeholder="brightsmile.dental"></div>
+      </div>
+      <div style="padding:0">
+        <div class="field"><label>Location code</label><input class="input" id="c-loc" value="2840" placeholder="2840"></div>
+      </div>
+      <div style="padding:0">
+        <div class="field"><label>Language</label><input class="input" id="c-lang" value="en" placeholder="en"></div>
+      </div>
+    </div>
+    <div class="mrow" style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn" id="c-cancel">Cancel</button>
+      <button class="btn btn-primary" id="c-save">Create brand</button>
+    </div>
+  </div>
+</div>
+
+<div id="brands"></div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/brands.js"></script>
+{% endblock %}

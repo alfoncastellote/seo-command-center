@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+
+{% block topbar %}
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="view-head">
+      <h1>Settings</h1>
+      <span class="sub">Cost limits, scan concurrency and the weekly automatic refresh.</span>
+    </div>
+    <button class="btn btn-primary" id="save-settings" style="margin-left:auto">Save changes</button>
+  </div>
+</header>
+{% endblock %}
+
+{% block content %}
+<div class="panel">
+  <div class="panel-head"><h3>Scanning</h3></div>
+  <div class="panel-body">
+    <div class="split" style="grid-template-columns:1fr 1fr 1fr">
+      <div style="padding:0">
+        <div class="field"><label>Parallel DataForSEO requests</label><input class="input" id="s-concurrency" type="number" min="1" max="32"></div>
+      </div>
+      <div style="padding:0 0 0 18px">
+        <div class="field"><label>AI Visibility — runs per day</label><input class="input" id="s-ai-cap" type="number" min="0" max="50"></div>
+      </div>
+      <div style="padding:0 0 0 18px">
+        <div class="field"><label>Map Grid — runs per day</label><input class="input" id="s-grid-cap" type="number" min="0" max="50"></div>
+      </div>
+    </div>
+    <div class="field"><label>Brand name shown in the header</label><input class="input" id="s-brand" placeholder="SEO Visibility"></div>
+  </div>
+</div>
+
+<div class="panel">
+  <div class="panel-head"><h3>Weekly automatic refresh</h3></div>
+  <div class="panel-body" id="schedules"></div>
+</div>
+
+<div class="panel">
+  <div class="panel-head"><h3>Recent scans</h3><span class="meta" id="jobs-meta"></span></div>
+  <div class="panel-body"><div class="jobs" id="jobs"><div class="empty">No scans yet.</div></div></div>
+</div>
+
+<div class="panel">
+  <div class="panel-head"><h3>Sample data</h3></div>
+  <div class="panel-body">
+    <div class="hint">Load demo brands, AI Visibility history and map grids to explore the panel without spending API credits. This replaces all current data.</div>
+    <div style="margin-top:14px"><button class="btn btn-danger" id="seed-demo">Load demo data</button></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/settings.js"></script>
+{% endblock %}
