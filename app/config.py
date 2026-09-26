@@ -22,6 +22,12 @@ BRAND_NAME = env("BRAND_NAME", "SEO Visibility")
 DATAFORSEO_LOGIN = env("DATAFORSEO_LOGIN")
 DATAFORSEO_PASSWORD = env("DATAFORSEO_PASSWORD")
 
+OPENAI_API_KEY = env("OPENAI_API_KEY")
+OPENAI_MODEL = env("OPENAI_MODEL", "gpt-4o-mini")
+
+GEMINI_API_KEY = env("GEMINI_API_KEY")
+GEMINI_MODEL = env("GEMINI_MODEL", "gemini-3.8-flash")
+
 HOST = env("HOST", "0.0.0.0")
 PORT = int(env("PORT", "8000"))
 
@@ -40,4 +46,6 @@ DEFAULT_SETTINGS = {
     "geogrid_schedule_dow": "1",
     "geogrid_schedule_hour": "7",
     "brand_name": BRAND_NAME,
+    "openai_enabled": "1",
+    "gemini_enabled": "1",
 }

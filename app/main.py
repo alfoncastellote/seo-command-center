@@ -335,7 +335,7 @@ async def api_settings_set(payload: dict):
         "concurrency", "ai_daily_cap", "geogrid_daily_cap",
         "ai_schedule_enabled", "ai_schedule_dow", "ai_schedule_hour",
         "geogrid_schedule_enabled", "geogrid_schedule_dow", "geogrid_schedule_hour",
-        "brand_name",
+        "brand_name", "openai_enabled", "gemini_enabled",
     }
     clean = {k: str(v) for k, v in payload.items() if k in allowed}
     db.set_settings(clean)
@@ -356,6 +356,11 @@ async def api_demo_seed():
 async def api_credentials_test():
     from .providers import dataforseo as dfs
     return dfs.test_credentials()
+
+
+@app.get("/api/providers/status")
+async def api_providers_status():
+    return {"providers": ai_visibility.provider_status()}
 
 
 # ── helpers ─────────────────────────────────────────────────────────────────

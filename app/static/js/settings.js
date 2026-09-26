@@ -16,6 +16,27 @@
     wrap.appendChild(schedule("geogrid", "Map Grid", s));
   }
 
+  async function loadEngines() {
+    const wrap = document.getElementById("engines");
+    try {
+      const { providers } = await SVP.api("/api/providers/status");
+      wrap.innerHTML = "";
+      providers.forEach((p) => {
+        const row = SVP.el("div", { style: "display:flex;align-items:center;gap:14px;padding:10px 0;border-bottom:1px solid var(--line)" });
+        const toggle = SVP.el("label", { class: "cmp", style: "min-width:190px" });
+        const cb = SVP.el("input", { type: "checkbox" });
+        cb.checked = p.enabled;
+        if (p.key === "google_ai_overview") { cb.checked = true; cb.disabled = true; }
+        cb.dataset.engine = p.key;
+        toggle.appendChild(cb);
+        toggle.appendChild(SVP.el("span", { text: p.label }));
+        row.appendChild(toggle);
+        row.appendChild(SVP.el("span", { class: "pill " + (p.configured ? "ok" : "none"), text: p.configured ? "configured" : "no API key" }));
+        wrap.appendChild(row);
+      });
+    } catch (e) { wrap.innerHTML = '<div class="empty">Could not load engine status.</div>'; }
+  }
+
   function schedule(prefix, label, s) {
     const row = SVP.el("div", { style: "display:flex;align-items:flex-end;gap:22px;flex-wrap:wrap;padding:12px 0;border-bottom:1px solid var(--line)" });
     const toggle = SVP.el("label", { class: "cmp", style: "padding-bottom:10px" });
@@ -64,6 +85,9 @@
     });
     document.querySelectorAll("#schedules select[data-kind]").forEach((sel) => {
       payload[sel.dataset.prefix + "_schedule_" + sel.dataset.kind] = sel.value;
+    });
+    document.querySelectorAll("#engines input[data-engine]").forEach((cb) => {
+      payload[cb.dataset.engine + "_enabled"] = cb.checked ? "1" : "0";
     });
     try {
       await SVP.api("/api/settings", { method: "POST", body: JSON.stringify(payload) });
@@ -130,6 +154,7 @@
   };
 
   load().catch((e) => SVP.toast(e.message, "err"));
+  loadEngines();
   loadJobs();
   setInterval(loadJobs, 5000);
 })();

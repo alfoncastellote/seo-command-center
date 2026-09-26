@@ -53,8 +53,7 @@ def _execute(job: dict) -> None:
 
     if job_type == "ai_visibility":
         result = ai_visibility.run_brand(brand_id, progress)
-        summary = (f"AI Overviews on {result['n_ai']}/{result['total']} keywords · "
-                   f"cited in {result['n_cited']}")
+        summary = (f"{result['n_cited']} citations across {result['total']} engine checks")
     elif job_type == "geogrid":
         result = geogrid.run_brand(brand_id, progress)
         summary = (f"{result['points']} points × {result['keywords']} keywords")

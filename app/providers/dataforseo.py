@@ -6,6 +6,7 @@ import urllib.error
 import urllib.request
 
 from .. import config
+from . import util
 
 SERP_ORGANIC = "https://api.dataforseo.com/v3/serp/google/organic/live/advanced"
 MAPS_API = "https://api.dataforseo.com/v3/serp/google/maps/live/advanced"
@@ -70,12 +71,12 @@ def _post(url: str, payload, retries: int = 2, timeout: int = 120) -> dict:
     raise DataForSEOError(f"DataForSEO request failed: {last_error}")
 
 
-def _clean_domain(value: str) -> str:
-    return (value or "").lower().replace("www.", "").strip()
+def ai_overview_search(keyword: str, location_code: int, language_code: str,
+                       brand_name: str = "", domain: str = "") -> dict:
+    """Google AI Overview (unified provider interface).
 
-
-def ai_overview(keyword: str, location_code: int, language_code: str) -> tuple[dict, float]:
-    """Return ({has_ai, cited, refs}, cost) for one keyword."""
+    Returns {has_ai, sources, text, cost} for one keyword.
+    """
     payload = [{
         "keyword": keyword,
         "location_code": int(location_code),
@@ -89,18 +90,14 @@ def ai_overview(keyword: str, location_code: int, language_code: str) -> tuple[d
     items = ((data["tasks"][0].get("result") or [{}])[0].get("items")) or []
     ai = next((i for i in items if i.get("type") == "ai_overview"), None)
     if not ai:
-        return {"has_ai": False, "cited": False, "refs": []}, cost
-    refs = []
+        return {"has_ai": False, "sources": [], "text": "", "cost": cost}
+    sources = []
     for ref in ai.get("references") or []:
-        rd = _clean_domain(ref.get("domain") or "")
+        rd = util.clean_domain(ref.get("domain") or "")
         if rd:
-            refs.append(rd)
-    return {"has_ai": True, "cited": False, "refs": refs}, cost
-
-
-def domain_cited(domain: str, refs: list[str]) -> bool:
-    dom = _clean_domain(domain)
-    return any(rd == dom or rd.endswith("." + dom) for rd in refs)
+            sources.append(rd)
+    text = (ai.get("text") or "").strip()
+    return {"has_ai": True, "sources": sources, "text": text, "cost": cost}
 
 
 def maps_items(keyword: str, lat: float, lng: float, zoom: str, depth: int = 20,

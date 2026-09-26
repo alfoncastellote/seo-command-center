@@ -68,12 +68,15 @@ CREATE TABLE IF NOT EXISTS ai_runs (
 CREATE INDEX IF NOT EXISTS ix_ai_runs ON ai_runs(brand_id, ran_at);
 
 CREATE TABLE IF NOT EXISTS ai_results (
-    id      INTEGER PRIMARY KEY AUTOINCREMENT,
-    run_id  INTEGER NOT NULL REFERENCES ai_runs(id) ON DELETE CASCADE,
-    keyword TEXT NOT NULL,
-    has_ai  INTEGER NOT NULL DEFAULT 0,
-    cited   INTEGER NOT NULL DEFAULT 0,
-    refs    TEXT
+    id        INTEGER PRIMARY KEY AUTOINCREMENT,
+    run_id    INTEGER NOT NULL REFERENCES ai_runs(id) ON DELETE CASCADE,
+    provider  TEXT NOT NULL DEFAULT 'google_ai_overview',
+    keyword   TEXT NOT NULL,
+    has_ai    INTEGER NOT NULL DEFAULT 0,
+    mentioned INTEGER NOT NULL DEFAULT 0,
+    cited     INTEGER NOT NULL DEFAULT 0,
+    refs      TEXT,
+    snippet   TEXT
 );
 CREATE INDEX IF NOT EXISTS ix_ai_results ON ai_results(run_id);
 
@@ -135,9 +138,20 @@ def cursor(commit: bool = False):
         con.close()
 
 
+def _ensure_column(con: sqlite3.Connection, table: str, column: str, ddl: str) -> None:
+    cols = {row[1] for row in con.execute(f"PRAGMA table_info({table})")}
+    if column not in cols:
+        con.execute(f"ALTER TABLE {table} ADD COLUMN {column} {ddl}")
+
+
 def init_db() -> None:
     with cursor(commit=True) as con:
         con.executescript(SCHEMA)
+        # migrations for databases created before the multi-engine release
+        _ensure_column(con, "ai_results", "provider",
+                       "TEXT NOT NULL DEFAULT 'google_ai_overview'")
+        _ensure_column(con, "ai_results", "mentioned", "INTEGER NOT NULL DEFAULT 0")
+        _ensure_column(con, "ai_results", "snippet", "TEXT")
         for key, value in config.DEFAULT_SETTINGS.items():
             con.execute("INSERT OR IGNORE INTO settings(key, value) VALUES (?, ?)", (key, value))
 
