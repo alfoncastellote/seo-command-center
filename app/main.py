@@ -352,6 +352,12 @@ async def api_demo_seed():
     return {"ok": True}
 
 
+@app.post("/api/credentials/test")
+async def api_credentials_test():
+    from .providers import dataforseo as dfs
+    return dfs.test_credentials()
+
+
 # ── helpers ─────────────────────────────────────────────────────────────────
 
 def _cap_key(job_type: str) -> tuple[str, int, str]:

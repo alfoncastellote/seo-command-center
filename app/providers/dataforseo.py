@@ -54,7 +54,16 @@ def _post(url: str, payload, retries: int = 2, timeout: int = 120) -> dict:
             return data
         except DataForSEOError:
             raise
-        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError) as exc:
+        except urllib.error.HTTPError as exc:
+            if exc.code in (401, 403):
+                raise DataForSEOError(
+                    f"DataForSEO rejected the credentials (HTTP {exc.code}). "
+                    "Check DATAFORSEO_LOGIN and DATAFORSEO_PASSWORD."
+                )
+            last_error = exc
+            if attempt < retries:
+                time.sleep(1.5 * (attempt + 1))
+        except (urllib.error.URLError, TimeoutError, OSError) as exc:
             last_error = exc
             if attempt < retries:
                 time.sleep(1.5 * (attempt + 1))
@@ -94,14 +103,25 @@ def domain_cited(domain: str, refs: list[str]) -> bool:
     return any(rd == dom or rd.endswith("." + dom) for rd in refs)
 
 
-def maps_items(keyword: str, lat: float, lng: float, zoom: str, depth: int = 20) -> tuple[list, float]:
+def maps_items(keyword: str, lat: float, lng: float, zoom: str, depth: int = 20,
+               language_code: str = "en") -> tuple[list, float]:
     payload = [{
         "keyword": keyword,
         "location_coordinate": f"{lat},{lng},{zoom}",
-        "language_code": "en",
+        "language_code": language_code,
         "depth": depth,
     }]
     data = _post(MAPS_API, payload, timeout=120)
     cost = float(data.get("cost") or COST_MAP_PER_PULL)
     items = ((data["tasks"][0].get("result") or [{}])[0].get("items")) or []
     return items, cost
+
+
+def test_credentials() -> dict:
+    """Cheap end-to-end check: one Maps pull, returns ok/message/cost."""
+    try:
+        items, cost = maps_items("restaurant", 40.4168, -3.7038, "13z", language_code="es")
+        return {"ok": True, "message": f"Connected — DataForSEO returned {len(items)} results",
+                "cost": cost}
+    except DataForSEOError as exc:
+        return {"ok": False, "message": str(exc), "cost": 0.0}

@@ -102,6 +102,23 @@
   }
 
   document.getElementById("save-settings").onclick = save;
+  document.getElementById("test-creds").onclick = async () => {
+    const btn = document.getElementById("test-creds");
+    const out = document.getElementById("creds-result");
+    btn.disabled = true;
+    out.textContent = "Testing…";
+    out.style.color = "var(--muted)";
+    try {
+      const r = await SVP.api("/api/credentials/test", { method: "POST" });
+      out.textContent = r.ok ? "✓ " + r.message : "✗ " + r.message;
+      out.style.color = r.ok ? "var(--pos)" : "var(--neg)";
+    } catch (e) {
+      out.textContent = "✗ " + e.message;
+      out.style.color = "var(--neg)";
+    } finally {
+      btn.disabled = false;
+    }
+  };
   document.getElementById("seed-demo").onclick = async () => {
     if (!confirm("Replace all current data with sample demo data?")) return;
     try {

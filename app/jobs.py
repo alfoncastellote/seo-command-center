@@ -62,6 +62,8 @@ def _execute(job: dict) -> None:
         raise ValueError(f"unknown job type {job_type}")
     if result.get("errors"):
         summary += f" · {result['errors']} pulls failed"
+        if result.get("first_error"):
+            summary += f" ({result['first_error']})"
 
     _update(job_id, status="done", finished_at=db.now(),
             progress=result.get("total", result.get("points", 0)),

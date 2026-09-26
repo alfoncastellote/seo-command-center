@@ -46,6 +46,7 @@ def run_brand(brand_id: int, progress=None) -> dict:
     rows: list[dict] = []
     cost_total = 0.0
     errors = 0
+    first_error = None
     done = 0
 
     if progress:
@@ -66,11 +67,16 @@ def run_brand(brand_id: int, progress=None) -> dict:
                 cost_total += cost
             except Exception as exc:  # keep the run going on per-keyword failures
                 errors += 1
+                if first_error is None:
+                    first_error = str(exc)
                 rows.append({"keyword": kw, "has_ai": False, "cited": False,
                              "refs": [], "error": str(exc)})
             done += 1
             if progress:
                 progress(done, total, f"{done}/{total} keywords · ${cost_total:.4f}")
+
+    if errors and errors == total:
+        raise RuntimeError(f"All {total} keyword checks failed — {first_error}")
 
     order = {kw.lower(): i for i, kw in enumerate(keywords)}
     rows.sort(key=lambda r: order.get(r["keyword"].lower(), 0))
@@ -92,7 +98,7 @@ def run_brand(brand_id: int, progress=None) -> dict:
         )
 
     return {"run_id": run_id, "n_ai": n_ai, "n_cited": n_cited, "total": total,
-            "errors": errors, "cost": round(cost_total, 4)}
+            "errors": errors, "first_error": first_error, "cost": round(cost_total, 4)}
 
 
 def _top_cited(rows) -> list[dict]:

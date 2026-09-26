@@ -22,10 +22,10 @@ def grid_points(center: tuple[float, float], n: int, spacing_miles: float) -> li
     return pts
 
 
-def _brand_rank_at(keyword, lat, lng, zoom, domain, brand_name):
+def _brand_rank_at(keyword, lat, lng, zoom, domain, brand_name, language_code="en"):
     dom = (domain or "").lower().replace("www.", "")
     bname = (brand_name or "").lower()
-    items, cost = dfs.maps_items(keyword, lat, lng, zoom)
+    items, cost = dfs.maps_items(keyword, lat, lng, zoom, language_code=language_code)
     rank, top3 = None, []
     for it in items:
         rg = it.get("rank_group") or it.get("rank_absolute")
@@ -61,11 +61,13 @@ def run_brand(brand_id: int, progress=None) -> dict:
     center = (grid["center_lat"], grid["center_lng"])
     points = grid_points(center, int(grid["grid"]), float(grid["spacing_miles"]))
     zoom = grid["zoom"]
+    language_code = brand["language_code"] or "en"
     total = len(points) * len(kws)
     concurrency = int(db.get_setting("concurrency", "8"))
     rows = []
     cost_total = 0.0
     errors = 0
+    first_error = None
     done = 0
 
     if progress:
@@ -73,7 +75,8 @@ def run_brand(brand_id: int, progress=None) -> dict:
 
     with ThreadPoolExecutor(max_workers=max(1, concurrency)) as pool:
         futures = {
-            pool.submit(_brand_rank_at, kw, lat, lng, zoom, brand["domain"], brand_name): (kw, lat, lng)
+            pool.submit(_brand_rank_at, kw, lat, lng, zoom, brand["domain"], brand_name,
+                        language_code): (kw, lat, lng)
             for kw in kws for (lat, lng) in points
         }
         for fut in as_completed(futures):
@@ -81,13 +84,18 @@ def run_brand(brand_id: int, progress=None) -> dict:
             try:
                 rank, top3, cost = fut.result()
                 cost_total += cost
-            except Exception:
+            except Exception as exc:
                 rank, top3 = None, []
                 errors += 1
+                if first_error is None:
+                    first_error = str(exc)
             rows.append((kw, lat, lng, rank, top3))
             done += 1
             if progress:
                 progress(done, total, f"{done}/{total} pulls · ${cost_total:.4f}")
+
+    if errors and errors == total:
+        raise RuntimeError(f"All {total} map pulls failed — {first_error}")
 
     order = {(kw, lat, lng): i for i, (kw, lat, lng) in enumerate(futures.values())}
     rows.sort(key=lambda r: order.get((r[0], r[1], r[2]), 0))
@@ -101,7 +109,7 @@ def run_brand(brand_id: int, progress=None) -> dict:
               json.dumps(top3) if top3 else None) for (kw, lat, lng, rank, top3) in rows],
         )
     return {"run_at": run_at, "points": len(points), "keywords": len(kws),
-            "errors": errors, "cost": round(cost_total, 4)}
+            "errors": errors, "first_error": first_error, "cost": round(cost_total, 4)}
 
 
 def data() -> dict:
